@@ -91,3 +91,18 @@ export async function saveCategory(tx: Tx, actor: Actor, d: z.infer<typeof categ
   }
   await audit(tx, actor, { action: 'category.save', entityType: 'finance_category', entityId: d.categoryId, summary: `Saved ${d.scope} ${d.kind} category ${d.name}` });
 }
+
+/** Reconciliation: compares the calculated balance with a counted/bank balance and posts the difference as an adjustment. */
+export async function reconcileAccount(tx: Tx, actor: Actor, d: { accountId: string; countedBalance: string; txnDate: string; note: string }) {
+  const [a] = await tx`select a.name, a.opening_balance + coalesce((select sum(l.signed_amount) from office_ledger l where l.account_id = a.id and l.txn_date >= a.opening_date), 0) as balance
+    from office_accounts a where a.id = ${d.accountId}`;
+  if (!a) throw new UserError('Account not found.');
+  const [{ diff }] = await tx`select (${d.countedBalance}::numeric - ${a.balance}::numeric)::text as diff`;
+  if (Number(diff) === 0) return { diff: '0.00', posted: false };
+  await recordOfficeTxn(tx, actor, {
+    type: 'adjustment', direction: Number(diff) > 0 ? 1 : -1, accountId: d.accountId, amount: diff.replace('-', ''), txnDate: d.txnDate,
+    description: `Reconciliation adjustment (${a.name})`, notes: d.note, categoryId: undefined, reference: undefined, counterparty: undefined, toAccountId: undefined,
+  });
+  await audit(tx, actor, { action: 'office_account.reconcile', entityType: 'office_account', entityId: d.accountId, summary: `Reconciled ${a.name}: calculated ${a.balance}, counted ${d.countedBalance}`, reason: d.note });
+  return { diff, posted: true };
+}

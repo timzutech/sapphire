@@ -1,7 +1,8 @@
 'use client';
 
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import {
-  Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis, type TooltipContentProps,
+  Bar, BarChart, CartesianGrid, Line, LineChart, Tooltip, XAxis, YAxis, type TooltipContentProps,
 } from 'recharts';
 import { SERIES_COLORS } from '@/lib/chart-colors';
 
@@ -12,6 +13,26 @@ export interface ChartFormat { kind: ValueFormat; currency?: string; locale?: st
 
 const INK_MUTED = '#64748b';
 const GRID = '#e2e8f0';
+
+/** Measures its own width and renders the chart at that explicit size (more reliable than ResponsiveContainer). */
+function Sized({ height, label, children }: { height: number; label: string; children: (width: number) => ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [width, setWidth] = useState(0);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const update = () => setWidth(Math.floor(el.getBoundingClientRect().width));
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  return (
+    <div ref={ref} style={{ height }} role="img" aria-label={label} className="w-full min-w-0">
+      {width > 0 ? children(width) : null}
+    </div>
+  );
+}
 
 function fmt(v: number, f: ChartFormat, compact = false) {
   const locale = f.locale ?? 'en-NG';
@@ -83,9 +104,9 @@ export function BarsChart({ data, xKey, xLabel = 'Period', series, format = { ki
   return (
     <figure aria-label={ariaLabel}>
       <Legend series={series} />
-      <div style={{ height }} role="img" aria-label={ariaLabel}>
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={data} margin={{ top: 4, right: 4, bottom: 0, left: 0 }} barGap={2} barCategoryGap="28%">
+      <Sized height={height} label={ariaLabel}>
+        {(width) => (
+          <BarChart width={width} height={height} data={data} margin={{ top: 4, right: 4, bottom: 0, left: 0 }} barGap={2} barCategoryGap="28%">
             <CartesianGrid vertical={false} stroke={GRID} />
             <XAxis dataKey={xKey} tickLine={false} axisLine={{ stroke: GRID }} tick={{ fontSize: 11, fill: INK_MUTED }} interval="preserveStartEnd" minTickGap={8} />
             <YAxis tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: INK_MUTED }} width={56} tickFormatter={(v) => fmt(Number(v), format, true)} allowDecimals={format.kind !== 'number'} />
@@ -96,8 +117,8 @@ export function BarsChart({ data, xKey, xLabel = 'Period', series, format = { ki
                 radius={!stacked || i === series.length - 1 ? [4, 4, 0, 0] : [0, 0, 0, 0]} />
             ))}
           </BarChart>
-        </ResponsiveContainer>
-      </div>
+        )}
+      </Sized>
       <DataTable data={data} xKey={xKey} xLabel={xLabel} series={series} format={format} />
     </figure>
   );
@@ -109,9 +130,9 @@ export function LinesChart({ data, xKey, xLabel = 'Period', series, format = { k
   return (
     <figure aria-label={ariaLabel}>
       <Legend series={series} />
-      <div style={{ height }} role="img" aria-label={ariaLabel}>
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={data} margin={{ top: 6, right: 8, bottom: 0, left: 0 }}>
+      <Sized height={height} label={ariaLabel}>
+        {(width) => (
+          <LineChart width={width} height={height} data={data} margin={{ top: 6, right: 8, bottom: 0, left: 0 }}>
             <CartesianGrid vertical={false} stroke={GRID} />
             <XAxis dataKey={xKey} tickLine={false} axisLine={{ stroke: GRID }} tick={{ fontSize: 11, fill: INK_MUTED }} interval="preserveStartEnd" minTickGap={12} />
             <YAxis tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: INK_MUTED }} width={56} domain={yDomain} tickFormatter={(v) => fmt(Number(v), format, true)} />
@@ -122,8 +143,8 @@ export function LinesChart({ data, xKey, xLabel = 'Period', series, format = { k
                 activeDot={{ r: 5, strokeWidth: 2, stroke: '#fcfcfb' }} connectNulls />
             ))}
           </LineChart>
-        </ResponsiveContainer>
-      </div>
+        )}
+      </Sized>
       <DataTable data={data} xKey={xKey} xLabel={xLabel} series={series} format={format} />
     </figure>
   );

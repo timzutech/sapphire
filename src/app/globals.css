@@ -64,3 +64,6 @@ dialog[open] {
 }
 
 .tabular { font-variant-numeric: tabular-nums; }
+
+/* Grid items default to min-width:auto, which lets wide tables stretch whole columns on phones. */
+.grid > * { min-width: 0; }

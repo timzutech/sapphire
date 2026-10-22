@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { InteractionFields, ProspectFields } from '@/components/forms/prospect-forms';
 import { StatusBadge } from '@/components/ui/badge';
@@ -27,7 +28,7 @@ export async function ProspectDetail({ id, ctx, back }: { id: string; ctx: PageC
   const canEdit = session.role === 'admin' || p.owner_id === session.userId;
   return (
     <>
-      <PageHeader eyebrow={<a href={back} className="hover:underline">← Prospects</a>} title={p.name}
+      <PageHeader eyebrow={<Link href={back} className="hover:underline">← Prospects</Link>} title={p.name}
         description={<span className="flex flex-wrap items-center gap-2"><StatusBadge status={p.stage} label={STAGE_LABELS[p.stage as keyof typeof STAGE_LABELS]} />{p.archived_at ? <StatusBadge status="cancelled" label="Archived" /> : null}</span>}
         actions={canEdit ? (
           <>

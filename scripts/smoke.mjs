@@ -22,6 +22,7 @@ for (const p of (pathsArg ?? '/dashboard').split(',')) {
   const newErr = errors.slice(before);
   if (bad || newErr.length) failed++;
   console.log(`${bad || newErr.length ? 'FAIL' : 'ok  '} ${res?.status()} ${p}${newErr.length ? `\n     ${newErr.join('\n     ')}` : ''}`);
+  if (shotsDir) await page.waitForTimeout(1500);
   if (shotsDir) await page.screenshot({ path: `${shotsDir}/${p.replace(/[^a-z0-9]+/gi, '_')}.png`, fullPage: true });
 }
 await browser.close();

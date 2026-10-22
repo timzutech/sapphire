@@ -24,11 +24,11 @@ export function StatCard({ label, value, hint, icon: Icon, href, tone = 'neutral
     <div className="flex h-full items-start justify-between gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-xs transition-colors hover:border-slate-300">
       <div className="min-w-0">
         <div className="text-xs font-medium text-slate-500">{label}</div>
-        <div className="tabular mt-1.5 truncate text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">{value}</div>
+        <div className="tabular mt-1.5 break-words text-lg leading-tight font-semibold tracking-tight text-slate-900 sm:text-2xl">{value}</div>
         {hint ? <div className="mt-1 text-xs text-slate-500">{hint}</div> : null}
       </div>
       {Icon ? (
-        <div className={cn('grid size-9 shrink-0 place-items-center rounded-lg',
+        <div className={cn('hidden size-9 shrink-0 place-items-center rounded-lg sm:grid',
           tone === 'good' && 'bg-emerald-50 text-emerald-600', tone === 'warning' && 'bg-amber-50 text-amber-600',
           tone === 'critical' && 'bg-red-50 text-red-600', tone === 'brand' && 'bg-brand-50 text-brand-600', tone === 'neutral' && 'bg-slate-100 text-slate-600')}>
           <Icon className="size-4.5" aria-hidden />

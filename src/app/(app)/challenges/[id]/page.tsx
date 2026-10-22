@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto';
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ChallengeRules, Leaderboard, PhaseBadge } from '@/components/challenge-parts';
 import { ActionButton } from '@/components/ui/action-button';
@@ -41,7 +42,7 @@ export default async function ChallengePage({ params }: { params: Promise<{ id: 
   const mine = ranked.find((r) => r.key === session.userId);
   return (
     <>
-      <PageHeader eyebrow={<a href="/challenges" className="hover:underline">← Challenges</a>} title={c.name} description={c.description}
+      <PageHeader eyebrow={<Link href="/challenges" className="hover:underline">← Challenges</Link>} title={c.name} description={c.description}
         actions={<>
           <PhaseBadge phase={phase} />
           {!d.joined && (phase === 'active' || phase === 'upcoming') ? <ActionButton action={joinChallengeAction} fields={{ challengeId: id }} variant="primary" size="md">Join challenge</ActionButton> : null}

@@ -3,7 +3,7 @@
 import {
   adjustFineSchema, budgetSchema, cancelObligationSchema, categorySchema, correctionSchema, disputeSchema, expenseActionSchema, expenseSchema,
   fineCategorySchema, finePaymentSchema, issueFineSchema, obligationSchema, officeAccountSchema, officeTxnSchema, personalAccountSchema,
-  personalTxnSchema, resolveDisputeSchema, reverseSchema, reviewFinePaymentSchema, reviewTxnSchema, settleObligationSchema, txnIdSchema, waiveFineSchema,
+  personalTxnSchema, reconcileSchema, resolveDisputeSchema, reverseSchema, reviewFinePaymentSchema, reviewTxnSchema, settleObligationSchema, txnIdSchema, waiveFineSchema,
 } from '@/lib/validation/finance';
 import { runAction, type ActionState } from '../action';
 import * as expenses from '../services/expenses';
@@ -76,6 +76,12 @@ export async function reverseOfficeTxnAction(_: ActionState, fd: FormData) {
   return runAction({ formData: fd, schema: reverseSchema, admin: true, revalidate: OR }, async ({ tx, session, data }) => {
     await office.reverseOfficeTxn(tx, session, data);
     return 'Reversal recorded';
+  });
+}
+export async function reconcileAccountAction(_: ActionState, fd: FormData) {
+  return runAction({ formData: fd, schema: reconcileSchema, admin: true, revalidate: OR }, async ({ tx, session, data }) => {
+    const r = await office.reconcileAccount(tx, session, data);
+    return r.posted ? `Adjustment of ${r.diff} posted — balance now matches` : 'Balance already matches — nothing posted';
   });
 }
 export async function createObligationAction(_: ActionState, fd: FormData) {

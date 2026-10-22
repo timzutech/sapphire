@@ -134,3 +134,10 @@ export const resolveDisputeSchema = z.object({
   decision: enumOf(['upheld', 'rejected'] as const, 'Decision'),
   note: reqText('Resolution note', 500, 3),
 });
+
+export const reconcileSchema = z.object({
+  accountId: id('Account'),
+  countedBalance: moneyOrZero('Counted balance'),
+  txnDate: date(),
+  note: reqText('Note', 300, 3),
+});
