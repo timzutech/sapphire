@@ -13,6 +13,8 @@ export function createSql(url: string, max = 10): Sql {
     max,
     idle_timeout: 20,
     onnotice: () => {},
+    // Transaction-mode poolers (Supabase/Supavisor port 6543, PgBouncer) don't support prepared statements.
+    prepare: !(process.env.DATABASE_PREPARE === 'false' || /:6543\b/.test(url)),
     // Keep `date` columns as plain YYYY-MM-DD strings (office-local calendar dates; no timezone shifting).
     types: { date: { to: 1082, from: [1082], serialize: (x: string) => x, parse: (x: string) => x } },
   });

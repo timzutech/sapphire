@@ -196,6 +196,22 @@ announcements. Time-based reminders (task due/overdue, prospect follow-ups, fine
 
 If no scheduler is configured, reminders still appear through (2) but only when someone uses the app.
 
+## Using Supabase (hosted Postgres)
+
+The project `officehub` (ref `eytknulvxrbgbjabwegj`, region eu-west-2) has the full schema installed. To set one up from scratch:
+
+1. Run `db/migrations/0001`–`0006` in order in the Supabase SQL Editor (or `npm run db:migrate` with `DATABASE_OWNER_URL` set
+   to the project's `postgres` connection string). `db/supabase_remaining.sql` bundles 0002 (from `change_own_password`) to 0005.
+2. Edit and run `db/supabase_finish.sql`: it sets the `officehub_app` login password and creates your first office and administrator.
+3. Set `DATABASE_URL` from **Connect → Connection string** in the dashboard, replacing the user with `officehub_app.<project-ref>`:
+   - serverless (Vercel): transaction pooler, port **6543** — prepared statements are switched off automatically for this port;
+   - long-running server: session pooler, port 5432.
+
+   Example: `postgres://officehub_app.eytknulvxrbgbjabwegj:<password>@<pooler-host>:6543/postgres?sslmode=require`
+
+Supabase's REST/GraphQL API roles (`anon`, `authenticated`) have no access to OfficeHub tables (migration 0005); the app talks to
+Postgres only from the server. Supabase Auth and Storage are not used.
+
 ## Deployment
 
 1. Provision PostgreSQL (any managed Postgres works, including Supabase’s Postgres). `pgcrypto` must be available.
