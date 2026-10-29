@@ -191,7 +191,7 @@ submission reviews, goal milestones, fines and fine changes, financial submissio
 announcements. Time-based reminders (task due/overdue, prospect follow-ups, fine due dates, check-in reminders) are produced by
 `app.generate_reminders`, which is idempotent (dedupe keys) and runs:
 
-1. on a schedule via `GET /api/cron/reminders` with `Authorization: Bearer $CRON_SECRET` (`vercel.json` configures every 30 min); and
+1. on a schedule via `GET /api/cron/reminders` with `Authorization: Bearer $CRON_SECRET` (`vercel.json` runs it daily at 06:00 UTC, 07:00 in Lagos — the Vercel Hobby plan allows one run per day; use a shorter interval on Pro); and
 2. opportunistically when any member loads the app (throttled to once per 15 minutes per office).
 
 If no scheduler is configured, reminders still appear through (2) but only when someone uses the app.
